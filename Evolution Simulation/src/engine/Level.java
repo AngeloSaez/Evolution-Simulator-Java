@@ -34,11 +34,27 @@ public class Level {
 	
 	public Level() {
 		
-		Organism oin = new Organism(new Point(40, 40));
-		organisms.add(oin);
+		populateOrganisms();
 		
-		
-		
+	}
+	
+	// Initialization
+	private void populateOrganisms() {
+		/*
+		 * Spawns initial organisms in a different spot around the screen.
+		 */
+
+		int initialPopulation = 3;
+
+		for (int i = 0; i < initialPopulation; i++) {
+			// Random spawn
+			double spawnX = Math.random() * screen.width;
+			double spawnY = Math.random() * screen.height;
+			Point randomSpawn = new Point(spawnX, spawnY);
+			// Create organism
+			organisms.add(new Organism(randomSpawn));
+		}
+
 	}
 	
 	// Update
