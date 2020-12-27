@@ -1,9 +1,12 @@
 package objects;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import engine.Level;
 import engine.Main;
+import food.Food;
 import util.Point;
 
 public class Organism extends GameObject {
@@ -15,7 +18,11 @@ public class Organism extends GameObject {
 	 */
 	
 	// Traits
-	double runSpeed;
+	private double runSpeed;
+	public double energy;
+	private double energyDepletionRate;
+	public double benefitFromMeat;
+	public double benefitFromVeggie;
 	
 	public Organism(Point position) {
 		super(position, Main.tileRes, Main.tileRes);
@@ -24,12 +31,21 @@ public class Organism extends GameObject {
 		this.brightness = 0.7f;
 		// Trait initialization
 		hue = (float) (Math.random());
+		// Movement speed
 		runSpeed = 0.001 + Math.random() * 0.099;
+		// Energy ie. life points
+		energy = 40;
+		energyDepletionRate = 0.001;
+		// How much additional energy is actually added from the food's base sustinence
+		benefitFromMeat = Math.random();
+		benefitFromVeggie = Math.random();
 	}
 	
+	// Update
 	public void update(long deltaTime) {
 		seekFood(deltaTime);
 		translate(deltaTime);
+		depleteEnergy(deltaTime);
 	}
 	
 	public void translate(long deltaTime) {
@@ -84,6 +100,20 @@ public class Organism extends GameObject {
 		velocity.j = (closest.position.y - position.y > 0) ? velocity.j : -velocity.j;
 	}
 	
+	public void depleteEnergy(long deltaTime) {
+		energy -= energyDepletionRate * deltaTime;
+	}
 	
+	// Render
+	public void render(Graphics2D g) {
+		super.render(g);
+		// Render the energy levels
+		String energyString = "" + ((int) energy);
+		int energyStringWidth = g.getFontMetrics().stringWidth(energyString);
+		g.drawString(energyString, (int) (position.x - energyStringWidth / 2), (int) (position.y - drawHeight));
+		// Outline
+		g.setColor(Color.getHSBColor(hue, saturation, (float) (brightness * 0.4)));
+		g.drawRect((int) (position.x - drawWidth / 2), (int) (position.y - drawHeight / 2), (int) (drawWidth), (int) (drawHeight));
+	}
 	
 }
