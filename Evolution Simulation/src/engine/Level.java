@@ -6,10 +6,10 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Optional;
 
-import objects.Food;
-import objects.GameObject;
+import food.Food;
+import food.Meat;
+import food.Veggie;
 import objects.Organism;
 import util.Point;
 import util.Style;
@@ -35,8 +35,9 @@ public class Level {
 	public long deltaTime;
 	
 	// Food
-	public long foodTimer = 0;
-	public long foodLimit = 4;
+	public long foodLimit = 12;
+	public long meatTimer = 0;
+	public long veggieTimer = 0;
 	
 	// Lists
 	public static ArrayList<Food> food = new  ArrayList<Food>();
@@ -54,7 +55,7 @@ public class Level {
 		 * Spawns initial organisms in a different spot around the screen.
 		 */
 
-		int initialPopulation = 5;
+		int initialPopulation = 30;
 
 		for (int i = 0; i < initialPopulation; i++) {
 			// Random spawn
@@ -81,6 +82,8 @@ public class Level {
 		for (Organism o : organisms) o.update(deltaTime);
 		// Check food collisions
 		checkFoodCollisions();
+		// Despawn
+		despawnOrganisms();
 	}
 	
 	private void produceFood() {
@@ -94,25 +97,38 @@ public class Level {
 		 * bounds because at the moment there is no way to navigate
 		 * the world.
 		 */
-		final long productionTimeMillis = 1000 / Main.fastForward;
+		final long meatProductionTimeMillis = 4500 / Main.fastForward;
+		final long veggieProductionTimeMillis = 1000 / Main.fastForward;
 		
 		// Return if reached limit
 		if (food.size() >= foodLimit) return;
 		
 		// Increment timer
-		foodTimer += deltaTime;
+		meatTimer += deltaTime;
+		veggieTimer += deltaTime;
 		
-		// Determine if food needs to be spawned
-		if (foodTimer > productionTimeMillis) {
+		// Determine if meat needs to be spawned
+		if (meatTimer > meatProductionTimeMillis) {
 			// Spawn food
 			double spawnX = Math.random() * width;
 			double spawnY = Math.random() * height;
-			food.add(new Food(new Point(spawnX, spawnY)));
+			food.add(new Meat(new Point(spawnX, spawnY)));
 			
 			// Decrement timer
-			foodTimer -= productionTimeMillis;
+			meatTimer -= meatProductionTimeMillis;
 		}
-		
+
+		// Determine if meat needs to be spawned
+		if (veggieTimer > veggieProductionTimeMillis) {
+			// Spawn food
+			double spawnX = Math.random() * width;
+			double spawnY = Math.random() * height;
+			food.add(new Veggie(new Point(spawnX, spawnY)));
+
+			// Decrement timer
+			veggieTimer -= veggieProductionTimeMillis;
+		}
+
 	}
 	
 	private void checkFoodCollisions() {
@@ -123,6 +139,7 @@ public class Level {
 		for (Organism o : organisms) {
 			Rectangle hitbox = o.getHitbox();
 			Food collision = null;
+			// Search for food collision
 			for (Food f : food) {
 				Rectangle foodHitbox = f.getHitbox();
 				if (hitbox.intersects(foodHitbox)) {
@@ -130,8 +147,27 @@ public class Level {
 					break;
 				}
 			}
+			// Remove food
 			if (collision != null) {
+				// Add appropiate sustinence to energy
+				if (collision instanceof Meat) {
+					o.energy += collision.sustinence * o.benefitFromMeat;
+				}
+				if (collision instanceof Veggie) {
+					o.energy += collision.sustinence * o.benefitFromVeggie;
+				}
+				// Finally remove from list
 				food.remove(food.indexOf(collision));
+			}
+		}
+	}
+	
+	private void despawnOrganisms() {
+		// If an organism has no energy left, its life is over
+		for (Organism o : organisms) {
+			if (o.energy <= 0) {
+				organisms.remove(organisms.indexOf(o));
+				return;
 			}
 		}
 	}
