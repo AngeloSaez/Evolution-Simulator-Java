@@ -82,7 +82,7 @@ public class Main extends JFrame implements KeyListener {
 
 		// Draws to hidden buffer, clears previous image
 		Graphics2D g = (Graphics2D) bs.getDrawGraphics();
-		g.setBackground(Color.getHSBColor(0.7f, 0.1f, 0.3f));
+		g.setBackground(Color.getHSBColor(0.0f, 0.0f, 0.0f));
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 		g.clearRect(0, 0, screen.width, screen.height);
 		
@@ -103,16 +103,19 @@ public class Main extends JFrame implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		// Main keyPressed
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_BACK_SPACE:
 			System.exit(0);
 			break;
 		}
-		
+		// Level keyPressed
+		level.keyPressed(e);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		// Main keyReleased
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_Z:
 			if (fastForward > 1) fastForward--;
@@ -121,6 +124,8 @@ public class Main extends JFrame implements KeyListener {
 			fastForward++;
 			break;
 		}
+		// Level keyReleased
+		level.keyReleased(e);
 	}
 
 	@Override
